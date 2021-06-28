@@ -10,7 +10,9 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
     public Text ScoreText;
+    public Text HighScoreText;
     public GameObject GameOverText;
+    public GameObject GameOverPanel;
     
     private bool m_Started = false;
     private int m_Points;
@@ -33,6 +35,16 @@ public class MainManager : MonoBehaviour
                 var brick = Instantiate(BrickPrefab, position, Quaternion.identity);
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
+            }
+        }
+        if (GameManager.Instance.highScore == 0)
+        {
+            HighScoreText.text = "N/A";
+        }
+        else
+        {
+            {
+                HighScoreText.text = "Best Score: " + GameManager.Instance.highScoreName + " : " + GameManager.Instance.highScore + " points";
             }
         }
     }
@@ -58,18 +70,32 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                SceneManager.LoadScene(0);
+            }
         }
     }
 
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Player: {GameManager.Instance.playerName} Score : {m_Points}";
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        GameOverPanel.SetActive(true);
+        if (m_Points > GameManager.Instance.highScore)
+        {
+            Debug.Log("m_Points is higher than highScore");
+            GameManager.Instance.highScore = m_Points;
+            GameManager.Instance.highScoreName = GameManager.Instance.playerName;
+            GameManager.Instance.SaveGame();
+            Debug.Log("GameOver screen says: Current highScore is: " + GameManager.Instance.highScore);
+        }
     }
 }
